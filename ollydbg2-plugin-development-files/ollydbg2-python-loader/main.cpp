@@ -31,7 +31,7 @@ extc int __cdecl ODBG2_Pluginquery(int ollydbgversion, ulong *features, wchar_t 
     Py_Initialize();
     PyEval_InitThreads();
 
-    Addtolist(0x31337, RED, NAME_PLUGIN L" Plugin fully initialized.");
+	Addtolist(0x31337, RED, NAME_PLUGIN L" Plugin fully initialized.");
 
     return PLUGIN_VERSION;
 }
@@ -47,10 +47,15 @@ extc void __cdecl ODBG2_Plugindestroy(void)
 */
 extc t_menu * __cdecl ODBG2_Pluginmenu(wchar_t *type)
 {
-    if(wcscmp(type, PWM_MAIN) == 0)
+	if(wcscmp(type, PWM_MAIN) == 0)
         return g_MainMenu;
 
     return NULL;
+}
+
+extc void __cdecl ODBG2_Pluginmainloop(DEBUG_EVENT *debugevent) {
+	if (debugevent)
+		Addtolist(0, WHITE, L" Caught main loop %X", debugevent ? debugevent->dwDebugEventCode : 0);
 }
 
 void spawn_window(void)
@@ -76,7 +81,7 @@ void spawn_window(void)
     {
         /*
         XXX: Seems to not work when instrumenting OllyDBG2 ; 
-            I think the reason is:https://gyazo.com/298a59511b5828f9d97c42cf46a784e1
+            I think the reason is:
                 When you call ollydbg!Run it calls kernelbase!ContinueDebugEvent
                 "Only the thread that created dwProcessId with the CreateProcess function can call ContinueDebugEvent."
 
