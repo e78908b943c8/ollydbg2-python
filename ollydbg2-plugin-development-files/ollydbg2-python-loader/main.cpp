@@ -76,7 +76,7 @@ void spawn_window(void)
     {
         /*
         XXX: Seems to not work when instrumenting OllyDBG2 ; 
-            I think the reason is:
+            I think the reason is:https://gyazo.com/298a59511b5828f9d97c42cf46a784e1
                 When you call ollydbg!Run it calls kernelbase!ContinueDebugEvent
                 "Only the thread that created dwProcessId with the CreateProcess function can call ContinueDebugEvent."
 
@@ -161,4 +161,4 @@ DWORD WINAPI execute_python_script(LPVOID param)
 clean:
     free(path);
     return 1;
-}
+} 
