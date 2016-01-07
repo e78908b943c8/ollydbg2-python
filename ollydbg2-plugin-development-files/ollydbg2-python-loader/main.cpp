@@ -14,6 +14,51 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
     return TRUE;  // Successful DLL_PROCESS_ATTACH.
 }
 
+static PyObject *g_onexception;
+
+static PyObject *set_onexception(PyObject *dummy, PyObject *args) {
+	PyObject *result = NULL;
+	PyObject *temp;
+
+	if (PyArg_ParseTuple(args, "O:set_onexception", &temp)) {
+		if (!PyCallable_Check(temp)) {
+			PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+			return NULL;
+		}
+		Py_XINCREF(temp);
+		Py_XDECREF(g_onexception);
+		g_onexception = temp;
+		Py_INCREF(Py_None);
+		result = Py_None;
+	}
+	return result;
+}
+
+extc void __cdecl ODBG2_Pluginmainloop(DEBUG_EVENT *debugevent) {
+	if (debugevent && debugevent->dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
+	{
+		if (g_onexception)
+		{
+			PyObject *arglist = Py_BuildValue("()");
+			auto result = PyObject_CallObject(g_onexception, arglist);
+			Py_DECREF(arglist);
+			if (result != NULL) // don't care about the result
+				Py_DECREF(result);
+		}
+	}
+}
+
+static PyMethodDef methods[] = {
+	{"set_onexception", set_onexception, METH_VARARGS, "Set exception callback"},
+	{NULL, NULL, 0, NULL}
+};
+
+PyMODINIT_FUNC
+init_ollyapiex() {
+	Py_InitModule("ollyapiex", methods);
+}
+
+
 /*
     This routine is required by the OllyDBG plugin engine! 
 */
@@ -30,6 +75,8 @@ extc int __cdecl ODBG2_Pluginquery(int ollydbgversion, ulong *features, wchar_t 
     // Initialize the python environment, prepare the hooks
     Py_Initialize();
     PyEval_InitThreads();
+
+	init_ollyapiex();
 
 	Addtolist(0x31337, RED, NAME_PLUGIN L" Plugin fully initialized.");
 
@@ -51,11 +98,6 @@ extc t_menu * __cdecl ODBG2_Pluginmenu(wchar_t *type)
         return g_MainMenu;
 
     return NULL;
-}
-
-extc void __cdecl ODBG2_Pluginmainloop(DEBUG_EVENT *debugevent) {
-	if (debugevent)
-		Addtolist(0, WHITE, L" Caught main loop %X", debugevent ? debugevent->dwDebugEventCode : 0);
 }
 
 void spawn_window(void)
@@ -166,4 +208,4 @@ DWORD WINAPI execute_python_script(LPVOID param)
 clean:
     free(path);
     return 1;
-} 
+}
