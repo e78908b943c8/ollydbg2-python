@@ -17,6 +17,7 @@ typedef struct {
 	ulong ebp;
 	ulong esi;
 	ulong edi;
+	ulong eip;
 } Ctx;
 
 static void
@@ -40,6 +41,7 @@ Ctx_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 		self->ebp = 0;
 		self->esi = 0;
 		self->edi = 0;
+		self->eip = 0;
 	}
 
 	return (PyObject *)self;
@@ -50,10 +52,10 @@ Ctx_init(Ctx *self, PyObject *args, PyObject *kwds)
 {
 	PyObject *first = NULL, *last = NULL;
 
-	static char *kwlist[] = { "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", NULL };
+	static char *kwlist[] = { "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", "eip", NULL };
 
-	if (!PyArg_ParseTuple(args, "kkkkkkkk", 
-		&self->eax, &self->ecx, &self->edx, &self->ebx, &self->esp, &self->ebp, &self->esi, &self->edi)) {
+	if (!PyArg_ParseTuple(args, "kkkkkkkkk", 
+		&self->eax, &self->ecx, &self->edx, &self->ebx, &self->esp, &self->ebp, &self->esi, &self->edi, &self->eip)) {
 		Addtolist(0x31337, RED, NAME_PLUGIN L" Something went wrong while parsing arguments");
 		return -1;
 	}
@@ -63,14 +65,15 @@ Ctx_init(Ctx *self, PyObject *args, PyObject *kwds)
 
 
 static PyMemberDef Ctx_members[] = {
-	{"eax", T_ULONG, offsetof(Ctx, eax), 0, "eax" },
-	{"ecx", T_ULONG, offsetof(Ctx, ecx), 0, "ecx"},
-	{"edx", T_ULONG, offsetof(Ctx, edx), 0, "edx"},
-	{"ebx", T_ULONG, offsetof(Ctx, ebx), 0, "ebx"},
-	{"esp", T_ULONG, offsetof(Ctx, esp), 0, "esp"},
-	{"ebp", T_ULONG, offsetof(Ctx, ebp), 0, "ebp"},
-	{"esi", T_ULONG, offsetof(Ctx, esi), 0, "esi"},
-	{"edi", T_ULONG, offsetof(Ctx, edi), 0, "edi"},
+	{ "eax", T_ULONG, offsetof(Ctx, eax), 0, "eax" },
+	{ "ecx", T_ULONG, offsetof(Ctx, ecx), 0, "ecx" },
+	{ "edx", T_ULONG, offsetof(Ctx, edx), 0, "edx" },
+	{ "ebx", T_ULONG, offsetof(Ctx, ebx), 0, "ebx" },
+	{ "esp", T_ULONG, offsetof(Ctx, esp), 0, "esp" },
+	{ "ebp", T_ULONG, offsetof(Ctx, ebp), 0, "ebp" },
+	{ "esi", T_ULONG, offsetof(Ctx, esi), 0, "esi" },
+	{ "edi", T_ULONG, offsetof(Ctx, edi), 0, "edi" },
+	{ "eip", T_ULONG, offsetof(Ctx, eip), 0, "eip" },
 	{ NULL }  /* Sentinel */
 };
 
@@ -228,8 +231,8 @@ extc void __cdecl ODBG2_Plugindestroy(void)
 
 PyObject *makeCtx(t_reg *reg) {
 	auto argList1 = Py_BuildValue(
-		"kkkkkkkk", reg->r[0], reg->r[1], reg->r[2], reg->r[3], 
-		reg->r[4], reg->r[5], reg->r[6], reg->r[7]);
+		"kkkkkkkkk", reg->r[0], reg->r[1], reg->r[2], reg->r[3], 
+		reg->r[4], reg->r[5], reg->r[6], reg->r[7], reg->ip);
 	auto ctx = PyObject_CallObject((PyObject *)&CtxType, argList1);
 	Py_DECREF(argList1);
 	return ctx;
