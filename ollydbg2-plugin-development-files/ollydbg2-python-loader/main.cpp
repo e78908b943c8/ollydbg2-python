@@ -7,6 +7,11 @@
 #include <python.h>
 #include <structmember.h>
 
+/*
+Usage:
+http://pastebin.com/bcXbWwf6
+*/
+
 typedef struct {
 	PyObject_HEAD;
 	ulong eax;
