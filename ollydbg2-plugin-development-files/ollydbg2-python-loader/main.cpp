@@ -52,7 +52,7 @@ Ctx_init(Ctx *self, PyObject *args, PyObject *kwds)
 
 	static char *kwlist[] = { "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi", NULL };
 
-	if (!PyArg_ParseTuple(args, "KKKKKKKK", 
+	if (!PyArg_ParseTuple(args, "kkkkkkkk", 
 		&self->eax, &self->ecx, &self->edx, &self->ebx, &self->esp, &self->ebp, &self->esi, &self->edi)) {
 		Addtolist(0x31337, RED, NAME_PLUGIN L" Something went wrong while parsing arguments");
 		return -1;
@@ -228,7 +228,7 @@ extc void __cdecl ODBG2_Plugindestroy(void)
 
 PyObject *makeCtx(t_reg *reg) {
 	auto argList1 = Py_BuildValue(
-		"KKKKKKKK", reg->r[0], reg->r[1], reg->r[2], reg->r[3], 
+		"kkkkkkkk", reg->r[0], reg->r[1], reg->r[2], reg->r[3], 
 		reg->r[4], reg->r[5], reg->r[6], reg->r[7]);
 	auto ctx = PyObject_CallObject((PyObject *)&CtxType, argList1);
 	Py_DECREF(argList1);
