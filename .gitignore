@@ -213,3 +213,4 @@ ModelManifest.xml
 
 # deployment scripts
 *.py
+*.opendb
