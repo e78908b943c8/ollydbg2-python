@@ -102,6 +102,10 @@ static PyMethodDef Ctx_methods[] = {
 	{ NULL }  /* Sentinel */
 };
 
+/*
+Convenience container for registers
+This class will be passed to the callback
+*/
 static PyTypeObject CtxType = {
 	PyObject_HEAD_INIT(NULL)
 	0,                         /*ob_size*/
@@ -158,6 +162,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 
 static PyObject *g_onexception;
 
+/*
+The python side can now set callbacks for when ollydbg encounters exceptions
+This hopefully allows the script to log method arguments and resume execution
+*/
 static PyObject *set_onexception(PyObject *dummy, PyObject *args) {
 	PyObject *result = NULL;
 	PyObject *temp;
@@ -181,6 +189,9 @@ static PyMethodDef methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
+/*
+Kinda ugly but I'm defining the additional functionality in a separate module for now
+*/
 PyMODINIT_FUNC
 init_ollyapiex() {
 	PyObject* m;
