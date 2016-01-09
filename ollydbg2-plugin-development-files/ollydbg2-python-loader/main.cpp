@@ -274,7 +274,7 @@ extc int __cdecl ODBG2_Pluginexception(t_run *prun, const t_disasm *da, t_thread
 			Py_DECREF(ctx);
 		}
 	}
-	return PE_CONTINUE;
+	return PE_IGNORED;
 }
 
 /*
